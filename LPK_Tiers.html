@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LPK Tiers - Leaderboard</title>
+
+<style>
+:root {
+    --gold: #f5b942;
+    --dark-bg: #0b1220;
+    --card-bg: #141c2f;
+}
+
+body{
+    margin:0;
+    font-family: Arial, sans-serif;
+    background: var(--dark-bg);
+    color:white;
+}
+
+header{
+    padding:20px;
+    font-size:28px;
+    font-weight:bold;
+    text-align: center;
+}
+
+/* TABS WITH ICONS */
+.tabs{
+    display:flex;
+    gap:10px;
+    padding:0 20px 20px;
+    flex-wrap:wrap;
+    justify-content: center;
+}
+
+.tab{
+    background: var(--card-bg);
+    padding: 10px 15px;
+    border-radius: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.tab img { width: 20px; height: 20px; }
+
+.tab.active{
+    background: var(--gold);
+    color:black;
+    font-weight:bold;
+}
+
+.container{ padding: 20px; max-width: 900px; margin: auto; }
+
+/* GOLD RANK DESIGN */
+.player{
+    display:flex;
+    align-items:center;
+    background: var(--card-bg);
+    margin-bottom: 12px;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.rank-box {
+    background: var(--gold);
+    color: black;
+    width: 60px;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: bold;
+    font-style: italic;
+}
+
+.content-area {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    padding: 0 15px;
+    gap: 15px;
+}
+
+.skin{ width:45px; height:45px; border-radius:4px; }
+
+.info-text { flex: 1; }
+.name-line { font-size: 18px; font-weight: bold; }
+.title-line { font-size: 13px; color: var(--gold); margin-top: 2px; }
+
+.tier-icons-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.icon-unit { display: flex; flex-direction: column; align-items: center; font-size: 10px; }
+.icon-unit img { width: 18px; height: 18px; }
+
+/* ADMIN */
+.admin-login-btn{ position:fixed; top:20px; right:20px; background:#3b82f6; color:white; border:none; padding:10px; border-radius:8px; cursor:pointer; z-index:9999; }
+.admin-panel{ position:fixed; bottom:20px; right:20px; background: var(--card-bg); padding:16px; border-radius:14px; display:none; width:260px; border: 1px solid var(--gold); z-index: 10000; }
+input, select { padding:10px; margin:6px 0; border-radius:8px; border:none; width:100%; box-sizing: border-box; background: #0b1220; color: white; }
+.btn-save { background:#4CAF50; color:white; width: 100%; padding: 10px; border: none; border-radius: 8px; cursor: pointer; }
+.btn-remove { background:#ef4444; color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer; }
+</style>
+</head>
+<body>
+
+<header>🏆 LPK Tiers Leaderboard</header>
+
+<button class="admin-login-btn" id="adminBtn">Admin Login</button>
+
+<div class="tabs" id="tabs"></div>
+<div class="container" id="leaderboard"></div>
+
+<div class="admin-panel" id="adminPanel">
+    <div id="loginArea">
+        <b>Admin Login</b>
+        <input type="password" id="adminPassword" placeholder="Enter password">
+        <button class="btn-save" onclick="login()">Login</button>
+    </div>
+    <div id="adminControls" style="display:none;">
+        <b id="editingLabel">Editing: Overall</b>
+        <input id="targetName" placeholder="Player name">
+        <div id="tierInputGroup">
+            <select id="tierSelector">
+                <option value="Unranked">Unranked (0)</option>
+                <option value="HT1">HT1 (60)</option>
+                <option value="LT1">LT1 (45)</option>
+                <option value="HT2">HT2 (30)</option>
+                <option value="LT2">LT2 (20)</option>
+                <option value="HT3">HT3 (10)</option>
+                <option value="LT3">LT3 (6)</option>
+                <option value="HT4">HT4 (4)</option>
+                <option value="LT4">LT4 (3)</option>
+                <option value="HT5">HT5 (2)</option>
+                <option value="LT5">LT5 (1)</option>
+            </select>
+        </div>
+        <div id="pointsInputGroup" style="display:none;">
+            <input id="manualPoints" type="number" placeholder="Add/Sub Points">
+        </div>
+        <button class="btn-save" onclick="updatePlayerData()">Save Changes</button>
+    </div>
+</div>
+
+<script>
+// UPDATED NethOP ICON TO NETHERITE HELMET
+const modesConfig = {
+    "Overall": "https://minecraft.wiki/images/Nether_Star_JE3_BE2.png",
+    "LTMs": "https://minecraft.wiki/images/Clock_JE3_BE3.gif",
+    "Vanilla": "https://minecraft.wiki/images/Grass_Block_JE7_BE6.png",
+    "UHC": "https://minecraft.wiki/images/Golden_Apple_JE2_BE2.png",
+    "Pot": "https://minecraft.wiki/images/Splash_Potion_of_Healing_JE2_BE2.png",
+    "NethOP": "https://minecraft.wiki/images/Netherite_Helmet_JE2_BE2.png", 
+    "SMP": "https://minecraft.wiki/images/Iron_Pickaxe_JE3_BE2.png",
+    "Sword": "https://minecraft.wiki/images/Diamond_Sword_JE3_BE3.png",
+    "Axe": "https://minecraft.wiki/images/Netherite_Axe_JE2_BE2.png",
+    "Mace": "https://minecraft.wiki/images/Mace_JE1_BE1.png"
+};
+
+// POINT VALUES BASED ON USER TIERS
+const tierValues = { "HT1": 60, "LT1": 45, "HT2": 30, "LT2": 20, "HT3": 10, "LT3": 6, "HT4": 4, "LT4": 3, "HT5": 2, "LT5": 1, "Unranked": 0 };
+
+let currentMode = "Overall";
+let isAdmin = false;
+let players = JSON.parse(localStorage.getItem("lpkPlayers")) || [];
+
+function setMode(m) {
+    currentMode = m;
+    document.getElementById("editingLabel").innerText = "Editing: " + m;
+    document.getElementById("tierInputGroup").style.display = (m === "Overall") ? "none" : "block";
+    document.getElementById("pointsInputGroup").style.display = (m === "Overall") ? "block" : "none";
+    renderTabs();
+    renderPlayers();
+}
+
+function renderTabs() {
+    const tabs = document.getElementById("tabs");
+    tabs.innerHTML = Object.entries(modesConfig).map(([name, icon]) => `
+        <div class="tab ${currentMode === name ? 'active' : ''}" onclick="setMode('${name}')">
+            <img src="${icon}"> ${name}
+        </div>
+    `).join("");
+}
+
+// RANK TITLES
+function getPlayerTitle(rank) {
+    if (rank === 1) return "Combat Grandmaster";
+    if (rank === 2) return "Combat Master";
+    if (rank === 3) return "Combat Ace";
+    return "Combatant";
+}
+
+function renderPlayers() {
+    const board = document.getElementById("leaderboard");
+    board.innerHTML = "";
+
+    const sorted = [...players].sort((a,b) => (b.scores[currentMode] || 0) - (a.scores[currentMode] || 0));
+
+    sorted.forEach((p, i) => {
+        const rank = i + 1;
+        let sideContent = "";
+
+        if (currentMode === "Overall") {
+            sideContent = `<div class="tier-icons-row">` + 
+                Object.entries(modesConfig).filter(([m]) => m !== "Overall").map(([m, img]) => `
+                    <div class="icon-unit">
+                        <img src="${img}">
+                        <span style="color:${p.tiers[m] && p.tiers[m] !== 'Unranked' ? '#f5b942' : '#555'}">${p.tiers[m] || 'UR'}</span>
+                    </div>
+                `).join("") + `</div>`;
+        } else {
+            sideContent = `<b style="color:var(--gold); font-size: 1.2em;">${p.tiers[currentMode] || 'Unranked'}</b>`;
+        }
+
+        const div = document.createElement("div");
+        div.className = "player";
+        div.innerHTML = `
+            <div class="rank-box">${rank}</div>
+            <div class="content-area">
+                <img class="skin" src="https://mc-heads.net/avatar/${p.name}">
+                <div class="info-text">
+                    <div class="name-line">${p.name}</div>
+                    <div class="title-line">${getPlayerTitle(rank)} (${p.scores[currentMode] || 0} pts)</div>
+                </div>
+                ${sideContent}
+                ${isAdmin ? `<button class="btn-remove" onclick="removePlayer('${p.name}')">×</button>` : ''}
+            </div>`;
+        board.appendChild(div);
+    });
+}
+
+function login() {
+    // UPDATED PASSWORD
+    if(document.getElementById("adminPassword").value === "DeepWoken#") {
+        isAdmin = true;
+        document.getElementById("loginArea").style.display = "none";
+        document.getElementById("adminControls").style.display = "block";
+        renderPlayers();
+    } else { alert("Wrong Password"); }
+}
+
+function updatePlayerData() {
+    const name = document.getElementById("targetName").value.trim();
+    if(!name) return;
+
+    let p = players.find(x => x.name.toLowerCase() === name.toLowerCase());
+    if(!p) {
+        p = { name: name, tiers: {}, scores: {}, bonus: 0 };
+        Object.keys(modesConfig).forEach(m => { p.tiers[m] = "Unranked"; p.scores[m] = 0; });
+        players.push(p);
+    }
+
+    if (currentMode === "Overall") {
+        p.bonus += (parseInt(document.getElementById("manualPoints").value) || 0);
+    } else {
+        const t = document.getElementById("tierSelector").value;
+        p.tiers[currentMode] = t;
+        p.scores[currentMode] = tierValues[t] || 0;
+    }
+
+    // AUTO-RECALCULATE OVERALL
+    let total = p.bonus || 0;
+    Object.keys(modesConfig).forEach(m => { if(m !== "Overall") total += (tierValues[p.tiers[m]] || 0); });
+    p.scores["Overall"] = total;
+
+    localStorage.setItem("lpkPlayers", JSON.stringify(players));
+    renderPlayers();
+    document.getElementById("targetName").value = "";
+    document.getElementById("manualPoints").value = "";
+}
+
+function removePlayer(name) {
+    if(confirm("Delete " + name + "?")) {
+        players = players.filter(p => p.name !== name);
+        localStorage.setItem("lpkPlayers", JSON.stringify(players));
+        renderPlayers();
+    }
+}
+
+document.getElementById("adminBtn").onclick = () => {
+    const p = document.getElementById("adminPanel");
+    p.style.display = (p.style.display === "block") ? "none" : "block";
+};
+
+window.onload = () => { renderTabs(); renderPlayers(); };
+</script>
+</body>
+</html>
