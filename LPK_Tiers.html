@@ -3,7 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LPK Tiers - Leaderboard</title>
+<title>LPK Tiers - Global Leaderboard</title>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
 <style>
 :root {
@@ -12,30 +15,35 @@
     --card-bg: #141c2f;
 }
 
-body{
-    margin:0;
+body {
+    margin: 0;
     font-family: Arial, sans-serif;
     background: var(--dark-bg);
-    color:white;
+    color: white;
+    overflow-x: hidden;
 }
 
-header{
-    padding:20px;
-    font-size:28px;
-    font-weight:bold;
+header {
+    padding: 20px;
+    font-size: 28px;
+    font-weight: bold;
     text-align: center;
 }
 
-/* TABS WITH ICONS */
-.tabs{
-    display:flex;
-    gap:10px;
-    padding:0 20px 20px;
-    flex-wrap:wrap;
-    justify-content: center;
+/* MOBILE OPTIMIZED TABS */
+.tabs {
+    display: flex;
+    gap: 10px;
+    padding: 0 20px 20px;
+    overflow-x: auto; /* Allows swiping on mobile */
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    justify-content: flex-start;
 }
 
-.tab{
+.tabs::-webkit-scrollbar { display: none; }
+
+.tab {
     background: var(--card-bg);
     padding: 10px 15px;
     border-radius: 12px;
@@ -43,22 +51,23 @@ header{
     display: flex;
     align-items: center;
     gap: 8px;
+    flex-shrink: 0;
 }
 
 .tab img { width: 20px; height: 20px; }
 
-.tab.active{
+.tab.active {
     background: var(--gold);
-    color:black;
-    font-weight:bold;
+    color: black;
+    font-weight: bold;
 }
 
-.container{ padding: 20px; max-width: 900px; margin: auto; }
+.container { padding: 10px; max-width: 900px; margin: auto; }
 
-/* GOLD RANK DESIGN */
-.player{
-    display:flex;
-    align-items:center;
+/* PLAYER ROW DESIGN */
+.player {
+    display: flex;
+    align-items: center;
     background: var(--card-bg);
     margin-bottom: 12px;
     border-radius: 4px;
@@ -76,6 +85,7 @@ header{
     font-size: 24px;
     font-weight: bold;
     font-style: italic;
+    flex-shrink: 0;
 }
 
 .content-area {
@@ -84,24 +94,31 @@ header{
     align-items: center;
     padding: 0 15px;
     gap: 15px;
+    min-width: 0;
 }
 
-.skin{ width:45px; height:45px; border-radius:4px; }
+.skin { width: 45px; height: 45px; border-radius: 4px; flex-shrink: 0; }
 
-.info-text { flex: 1; }
-.name-line { font-size: 18px; font-weight: bold; }
+.info-text { flex: 1; min-width: 0; }
+.name-line { font-size: 18px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .title-line { font-size: 13px; color: var(--gold); margin-top: 2px; }
 
-.tier-icons-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.tier-icons-row { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
 .icon-unit { display: flex; flex-direction: column; align-items: center; font-size: 10px; }
 .icon-unit img { width: 18px; height: 18px; }
 
-/* ADMIN */
-.admin-login-btn{ position:fixed; top:20px; right:20px; background:#3b82f6; color:white; border:none; padding:10px; border-radius:8px; cursor:pointer; z-index:9999; }
-.admin-panel{ position:fixed; bottom:20px; right:20px; background: var(--card-bg); padding:16px; border-radius:14px; display:none; width:260px; border: 1px solid var(--gold); z-index: 10000; }
-input, select { padding:10px; margin:6px 0; border-radius:8px; border:none; width:100%; box-sizing: border-box; background: #0b1220; color: white; }
-.btn-save { background:#4CAF50; color:white; width: 100%; padding: 10px; border: none; border-radius: 8px; cursor: pointer; }
-.btn-remove { background:#ef4444; color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer; }
+/* ADMIN UI */
+.admin-login-btn { position: fixed; top: 20px; right: 20px; background: #3b82f6; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; z-index: 9999; }
+.admin-panel { position: fixed; bottom: 20px; right: 20px; left: 20px; background: var(--card-bg); padding: 16px; border-radius: 14px; display: none; border: 1px solid var(--gold); z-index: 10000; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
+
+@media (min-width: 600px) {
+    .admin-panel { left: auto; width: 280px; }
+    .tabs { justify-content: center; }
+}
+
+input, select { padding: 10px; margin: 6px 0; border-radius: 8px; border: none; width: 100%; box-sizing: border-box; background: #0b1220; color: white; font-size: 16px; }
+.btn-save { background: #4CAF50; color: white; width: 100%; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+.btn-remove { background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; margin-left: 10px; }
 </style>
 </head>
 <body>
@@ -111,7 +128,7 @@ input, select { padding:10px; margin:6px 0; border-radius:8px; border:none; widt
 <button class="admin-login-btn" id="adminBtn">Admin Login</button>
 
 <div class="tabs" id="tabs"></div>
-<div class="container" id="leaderboard"></div>
+<div class="container" id="leaderboard">Loading Global Data...</div>
 
 <div class="admin-panel" id="adminPanel">
     <div id="loginArea">
@@ -140,12 +157,28 @@ input, select { padding:10px; margin:6px 0; border-radius:8px; border:none; widt
         <div id="pointsInputGroup" style="display:none;">
             <input id="manualPoints" type="number" placeholder="Add/Sub Points">
         </div>
-        <button class="btn-save" onclick="updatePlayerData()">Save Changes</button>
+        <button class="btn-save" onclick="updatePlayerData()">Save to Cloud</button>
+        <button class="btn-save" style="background:#666; margin-top:5px;" onclick="document.getElementById('adminPanel').style.display='none'">Close</button>
     </div>
 </div>
 
 <script>
-// UPDATED NethOP ICON TO NETHERITE HELMET
+// YOUR CONFIG FROM SCREENSHOT
+const firebaseConfig = {
+  apiKey: "AIzaSyDqCFNf8Y0373eYUr-Sexy4Qm91R_wv2lN",
+  authDomain: "lpk-tiers.firebaseapp.com",
+  databaseURL: "https://lpk-tiers-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "lpk-tiers",
+  storageBucket: "lpk-tiers.firebasestorage.app",
+  messagingSenderId: "1039213934246",
+  appId: "1:1039213934246:web:ce4bd381d96154e4d56667",
+  measurementId: "G-5YC586WNLJ"
+};
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
 const modesConfig = {
     "Overall": "https://minecraft.wiki/images/Nether_Star_JE3_BE2.png",
     "LTMs": "https://minecraft.wiki/images/Clock_JE3_BE3.gif",
@@ -159,12 +192,18 @@ const modesConfig = {
     "Mace": "https://minecraft.wiki/images/Mace_JE1_BE1.png"
 };
 
-// POINT VALUES BASED ON USER TIERS
 const tierValues = { "HT1": 60, "LT1": 45, "HT2": 30, "LT2": 20, "HT3": 10, "LT3": 6, "HT4": 4, "LT4": 3, "HT5": 2, "LT5": 1, "Unranked": 0 };
 
 let currentMode = "Overall";
 let isAdmin = false;
-let players = JSON.parse(localStorage.getItem("lpkPlayers")) || [];
+let players = [];
+
+// FETCH FROM CLOUD
+db.ref("players").on("value", (snapshot) => {
+    const data = snapshot.val();
+    players = data ? Object.values(data) : [];
+    renderPlayers();
+});
 
 function setMode(m) {
     currentMode = m;
@@ -184,7 +223,6 @@ function renderTabs() {
     `).join("");
 }
 
-// RANK TITLES
 function getPlayerTitle(rank) {
     if (rank === 1) return "Combat Grandmaster";
     if (rank === 2) return "Combat Master";
@@ -207,7 +245,7 @@ function renderPlayers() {
                 Object.entries(modesConfig).filter(([m]) => m !== "Overall").map(([m, img]) => `
                     <div class="icon-unit">
                         <img src="${img}">
-                        <span style="color:${p.tiers[m] && p.tiers[m] !== 'Unranked' ? '#f5b942' : '#555'}">${p.tiers[m] || 'UR'}</span>
+                        <span style="color:${p.tiers[m] && p.tiers[m] !== 'Unranked' ? '#f5b942' : '#555'}">${p.tiers[m] ? p.tiers[m].replace('Unranked','UR') : 'UR'}</span>
                     </div>
                 `).join("") + `</div>`;
         } else {
@@ -232,59 +270,8 @@ function renderPlayers() {
 }
 
 function login() {
-    // UPDATED PASSWORD
     if(document.getElementById("adminPassword").value === "DeepWoken#") {
         isAdmin = true;
         document.getElementById("loginArea").style.display = "none";
         document.getElementById("adminControls").style.display = "block";
-        renderPlayers();
-    } else { alert("Wrong Password"); }
-}
-
-function updatePlayerData() {
-    const name = document.getElementById("targetName").value.trim();
-    if(!name) return;
-
-    let p = players.find(x => x.name.toLowerCase() === name.toLowerCase());
-    if(!p) {
-        p = { name: name, tiers: {}, scores: {}, bonus: 0 };
-        Object.keys(modesConfig).forEach(m => { p.tiers[m] = "Unranked"; p.scores[m] = 0; });
-        players.push(p);
-    }
-
-    if (currentMode === "Overall") {
-        p.bonus += (parseInt(document.getElementById("manualPoints").value) || 0);
-    } else {
-        const t = document.getElementById("tierSelector").value;
-        p.tiers[currentMode] = t;
-        p.scores[currentMode] = tierValues[t] || 0;
-    }
-
-    // AUTO-RECALCULATE OVERALL
-    let total = p.bonus || 0;
-    Object.keys(modesConfig).forEach(m => { if(m !== "Overall") total += (tierValues[p.tiers[m]] || 0); });
-    p.scores["Overall"] = total;
-
-    localStorage.setItem("lpkPlayers", JSON.stringify(players));
-    renderPlayers();
-    document.getElementById("targetName").value = "";
-    document.getElementById("manualPoints").value = "";
-}
-
-function removePlayer(name) {
-    if(confirm("Delete " + name + "?")) {
-        players = players.filter(p => p.name !== name);
-        localStorage.setItem("lpkPlayers", JSON.stringify(players));
-        renderPlayers();
-    }
-}
-
-document.getElementById("adminBtn").onclick = () => {
-    const p = document.getElementById("adminPanel");
-    p.style.display = (p.style.display === "block") ? "none" : "block";
-};
-
-window.onload = () => { renderTabs(); renderPlayers(); };
-</script>
-</body>
-</html>
+        renderPlayers
