@@ -13,26 +13,21 @@
 body { margin:0; font-family: Arial, sans-serif; background: var(--dark-bg); color:white; overflow-x: hidden; }
 header { padding: 20px; font-size: 28px; font-weight: bold; text-align: center; }
 .tabs { display: flex; gap: 10px; padding: 0 20px 20px; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; }
-.tabs::-webkit-scrollbar { display: none; }
 .tab { background: var(--card-bg); padding: 10px 15px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 .tab img { width: 20px; height: 20px; }
 .tab.active { background: var(--gold); color: black; font-weight: bold; }
 .container { padding: 10px; max-width: 900px; margin: auto; }
 .player { display: flex; align-items: center; background: var(--card-bg); margin-bottom: 12px; border-radius: 4px; overflow: hidden; }
-.rank-box { background: var(--gold); color: black; width: 60px; height: 70px; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; flex-shrink: 0; }
-.content-area { display: flex; flex: 1; align-items: center; padding: 0 15px; gap: 15px; min-width: 0; }
-.skin { width: 45px; height: 45px; border-radius: 4px; flex-shrink: 0; }
-.info-text { flex: 1; min-width: 0; }
-.name-line { font-size: 18px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.title-line { font-size: 13px; color: var(--gold); margin-top: 2px; }
-.tier-icons-row { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
-.icon-unit { display: flex; flex-direction: column; align-items: center; font-size: 10px; }
-.icon-unit img { width: 18px; height: 18px; }
+.rank-box { background: var(--gold); color: black; width: 60px; height: 70px; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; }
+.content-area { display: flex; flex: 1; align-items: center; padding: 0 15px; gap: 15px; }
+.skin { width: 45px; height: 45px; border-radius: 4px; }
+.info-text { flex: 1; }
+.name-line { font-size: 18px; font-weight: bold; }
+.title-line { font-size: 13px; color: var(--gold); }
 .admin-login-btn { position: fixed; top: 20px; right: 20px; background: #3b82f6; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; z-index: 9999; }
-.admin-panel { position: fixed; bottom: 20px; right: 20px; left: 20px; background: var(--card-bg); padding: 16px; border-radius: 14px; display: none; border: 1px solid var(--gold); z-index: 10000; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
-input, select { padding: 10px; margin: 6px 0; border-radius: 8px; border: none; width: 100%; box-sizing: border-box; background: #0b1220; color: white; font-size: 16px; }
+.admin-panel { position: fixed; bottom: 20px; right: 20px; left: 20px; background: var(--card-bg); padding: 16px; border-radius: 14px; display: none; border: 1px solid var(--gold); z-index: 10000; }
+input, select { padding: 10px; margin: 6px 0; border-radius: 8px; border: none; width: 100%; box-sizing: border-box; background: #0b1220; color: white; }
 .btn-save { background: #4CAF50; color: white; width: 100%; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
-@media (min-width: 600px) { .admin-panel { left: auto; width: 280px; } }
 </style>
 </head>
 <body>
@@ -51,25 +46,20 @@ input, select { padding: 10px; margin: 6px 0; border-radius: 8px; border: none; 
     <div id="adminControls" style="display:none;">
         <b id="editingLabel">Editing: Overall</b>
         <input id="targetName" placeholder="Player name">
-        <div id="tierInputGroup">
-            <select id="tierSelector">
-                <option value="Unranked">Unranked (0)</option>
-                <option value="HT1">HT1 (60)</option><option value="LT1">LT1 (45)</option>
-                <option value="HT2">HT2 (30)</option><option value="LT2">LT2 (20)</option>
-                <option value="HT3">HT3 (10)</option><option value="LT3">LT3 (6)</option>
-                <option value="HT4">HT4 (4)</option><option value="LT4">LT4 (3)</option>
-                <option value="HT5">HT5 (2)</option><option value="LT5">LT5 (1)</option>
-            </select>
-        </div>
-        <div id="pointsInputGroup" style="display:none;">
-            <input id="manualPoints" type="number" placeholder="Add/Sub Points">
-        </div>
-        <button class="btn-save" onclick="updatePlayerData()">Save to Cloud</button>
+        <select id="tierSelector">
+            <option value="Unranked">Unranked (0)</option>
+            <option value="HT1">HT1 (60)</option><option value="LT1">LT1 (45)</option>
+            <option value="HT2">HT2 (30)</option><option value="LT2">LT2 (20)</option>
+            <option value="HT3">HT3 (10)</option><option value="LT3">LT3 (6)</option>
+            <option value="HT4">HT4 (4)</option><option value="LT4">LT4 (3)</option>
+            <option value="HT5">HT5 (2)</option><option value="LT5">LT5 (1)</option>
+        </select>
+        <input id="manualPoints" type="number" placeholder="Bonus Points" style="display:none;">
+        <button class="btn-save" onclick="updatePlayerData()">Save to Firebase</button>
     </div>
 </div>
 
 <script>
-// DATA FROM YOUR SCREENSHOTS
 const firebaseConfig = {
   apiKey: "AIzaSyDqCFNf8Y0373eYUr-Sexy4Qm91R_wv2lN",
   authDomain: "lpk-tiers.firebaseapp.com",
@@ -77,8 +67,7 @@ const firebaseConfig = {
   projectId: "lpk-tiers",
   storageBucket: "lpk-tiers.firebasestorage.app",
   messagingSenderId: "1039213934246",
-  appId: "1:1039213934246:web:ce4bd381d96154e4d56667",
-  measurementId: "G-5YC586WNLJ"
+  appId: "1:1039213934246:web:ce4bd381d96154e4d56667"
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -98,12 +87,11 @@ const modesConfig = {
 };
 
 const tierValues = { "HT1": 60, "LT1": 45, "HT2": 30, "LT2": 20, "HT3": 10, "LT3": 6, "HT4": 4, "LT4": 3, "HT5": 2, "LT5": 1, "Unranked": 0 };
-
 let currentMode = "Overall";
 let isAdmin = false;
 let players = [];
 
-// FETCH FROM CLOUD
+// FETCH FROM FIREBASE
 db.ref("players").on("value", (snapshot) => {
     const data = snapshot.val();
     players = data ? Object.values(data) : [];
@@ -113,8 +101,8 @@ db.ref("players").on("value", (snapshot) => {
 function setMode(m) {
     currentMode = m;
     document.getElementById("editingLabel").innerText = "Editing: " + m;
-    document.getElementById("tierInputGroup").style.display = (m === "Overall") ? "none" : "block";
-    document.getElementById("pointsInputGroup").style.display = (m === "Overall") ? "block" : "none";
+    document.getElementById("tierSelector").style.display = (m === "Overall") ? "none" : "block";
+    document.getElementById("manualPoints").style.display = (m === "Overall") ? "block" : "none";
     renderTabs();
     renderPlayers();
 }
@@ -135,13 +123,9 @@ function renderPlayers() {
 
     sorted.forEach((p, i) => {
         const rank = i + 1;
-        let sideContent = (currentMode === "Overall") ? 
-            `<div class="tier-icons-row">` + Object.entries(modesConfig).filter(([m]) => m !== "Overall").map(([m, img]) => `<div class="icon-unit"><img src="${img}"><span style="color:${p.tiers[m] && p.tiers[m] !== 'Unranked' ? '#f5b942' : '#555'}">${p.tiers[m] ? p.tiers[m].replace('Unranked','UR') : 'UR'}</span></div>`).join("") + `</div>` :
-            `<b style="color:var(--gold);">${p.tiers[currentMode] || 'Unranked'}</b>`;
-
         const div = document.createElement("div");
         div.className = "player";
-        div.innerHTML = `<div class="rank-box">${rank}</div><div class="content-area"><img class="skin" src="https://mc-heads.net/avatar/${p.name}"><div class="info-text"><div class="name-line">${p.name}</div><div class="title-line">${p.scores[currentMode] || 0} pts</div></div>${sideContent}${isAdmin ? `<button onclick="removePlayer('${p.name}')" style="background:red; color:white; border:none; padding:5px; margin-left:10px;">×</button>` : ''}</div>`;
+        div.innerHTML = `<div class="rank-box">${rank}</div><div class="content-area"><img class="skin" src="https://mc-heads.net/avatar/${p.name}"><div class="info-text"><div class="name-line">${p.name}</div><div class="title-line">${p.scores[currentMode] || 0} pts</div></div>${isAdmin ? `<button onclick="removePlayer('${p.name}')" style="background:red; color:white; border:none; padding:5px;">×</button>` : ''}</div>`;
         board.appendChild(div);
     });
 }
@@ -165,10 +149,14 @@ function updatePlayerData() {
     }
     if (currentMode === "Overall") p.bonus = (p.bonus || 0) + (parseInt(document.getElementById("manualPoints").value) || 0);
     else { const t = document.getElementById("tierSelector").value; p.tiers[currentMode] = t; p.scores[currentMode] = tierValues[t] || 0; }
+    
     let total = p.bonus || 0;
     Object.keys(modesConfig).forEach(m => { if(m !== "Overall") total += (tierValues[p.tiers[m]] || 0); });
     p.scores["Overall"] = total;
+
+    // SAVE TO FIREBASE
     db.ref("players/" + name.replace(/\./g, '_')).set(p);
+    
     document.getElementById("targetName").value = "";
     document.getElementById("manualPoints").value = "";
 }
