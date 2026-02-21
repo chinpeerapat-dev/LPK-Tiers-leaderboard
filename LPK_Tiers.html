@@ -9,126 +9,38 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
 <style>
-:root {
-    --gold: #f5b942;
-    --dark-bg: #0b1220;
-    --card-bg: #141c2f;
-}
-
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: var(--dark-bg);
-    color: white;
-    overflow-x: hidden;
-}
-
-header {
-    padding: 20px;
-    font-size: 28px;
-    font-weight: bold;
-    text-align: center;
-}
-
-/* MOBILE OPTIMIZED TABS */
-.tabs {
-    display: flex;
-    gap: 10px;
-    padding: 0 20px 20px;
-    overflow-x: auto; /* Allows swiping on mobile */
-    white-space: nowrap;
-    -webkit-overflow-scrolling: touch;
-    justify-content: flex-start;
-}
-
+:root { --gold: #f5b942; --dark-bg: #0b1220; --card-bg: #141c2f; }
+body { margin:0; font-family: Arial, sans-serif; background: var(--dark-bg); color:white; overflow-x: hidden; }
+header { padding: 20px; font-size: 28px; font-weight: bold; text-align: center; }
+.tabs { display: flex; gap: 10px; padding: 0 20px 20px; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; }
 .tabs::-webkit-scrollbar { display: none; }
-
-.tab {
-    background: var(--card-bg);
-    padding: 10px 15px;
-    border-radius: 12px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-shrink: 0;
-}
-
+.tab { background: var(--card-bg); padding: 10px 15px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 .tab img { width: 20px; height: 20px; }
-
-.tab.active {
-    background: var(--gold);
-    color: black;
-    font-weight: bold;
-}
-
+.tab.active { background: var(--gold); color: black; font-weight: bold; }
 .container { padding: 10px; max-width: 900px; margin: auto; }
-
-/* PLAYER ROW DESIGN */
-.player {
-    display: flex;
-    align-items: center;
-    background: var(--card-bg);
-    margin-bottom: 12px;
-    border-radius: 4px;
-    overflow: hidden;
-}
-
-.rank-box {
-    background: var(--gold);
-    color: black;
-    width: 60px;
-    height: 70px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    font-weight: bold;
-    font-style: italic;
-    flex-shrink: 0;
-}
-
-.content-area {
-    display: flex;
-    flex: 1;
-    align-items: center;
-    padding: 0 15px;
-    gap: 15px;
-    min-width: 0;
-}
-
+.player { display: flex; align-items: center; background: var(--card-bg); margin-bottom: 12px; border-radius: 4px; overflow: hidden; }
+.rank-box { background: var(--gold); color: black; width: 60px; height: 70px; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; flex-shrink: 0; }
+.content-area { display: flex; flex: 1; align-items: center; padding: 0 15px; gap: 15px; min-width: 0; }
 .skin { width: 45px; height: 45px; border-radius: 4px; flex-shrink: 0; }
-
 .info-text { flex: 1; min-width: 0; }
 .name-line { font-size: 18px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .title-line { font-size: 13px; color: var(--gold); margin-top: 2px; }
-
 .tier-icons-row { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
 .icon-unit { display: flex; flex-direction: column; align-items: center; font-size: 10px; }
 .icon-unit img { width: 18px; height: 18px; }
-
-/* ADMIN UI */
 .admin-login-btn { position: fixed; top: 20px; right: 20px; background: #3b82f6; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; z-index: 9999; }
 .admin-panel { position: fixed; bottom: 20px; right: 20px; left: 20px; background: var(--card-bg); padding: 16px; border-radius: 14px; display: none; border: 1px solid var(--gold); z-index: 10000; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
-
-@media (min-width: 600px) {
-    .admin-panel { left: auto; width: 280px; }
-    .tabs { justify-content: center; }
-}
-
 input, select { padding: 10px; margin: 6px 0; border-radius: 8px; border: none; width: 100%; box-sizing: border-box; background: #0b1220; color: white; font-size: 16px; }
 .btn-save { background: #4CAF50; color: white; width: 100%; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
-.btn-remove { background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; margin-left: 10px; }
+@media (min-width: 600px) { .admin-panel { left: auto; width: 280px; } }
 </style>
 </head>
 <body>
 
 <header>🏆 LPK Tiers Leaderboard</header>
-
-<button class="admin-login-btn" id="adminBtn">Admin Login</button>
-
+<button class="admin-login-btn" id="adminBtn">Admin</button>
 <div class="tabs" id="tabs"></div>
-<div class="container" id="leaderboard">Loading Global Data...</div>
+<div class="container" id="leaderboard">Loading...</div>
 
 <div class="admin-panel" id="adminPanel">
     <div id="loginArea">
@@ -142,28 +54,22 @@ input, select { padding: 10px; margin: 6px 0; border-radius: 8px; border: none; 
         <div id="tierInputGroup">
             <select id="tierSelector">
                 <option value="Unranked">Unranked (0)</option>
-                <option value="HT1">HT1 (60)</option>
-                <option value="LT1">LT1 (45)</option>
-                <option value="HT2">HT2 (30)</option>
-                <option value="LT2">LT2 (20)</option>
-                <option value="HT3">HT3 (10)</option>
-                <option value="LT3">LT3 (6)</option>
-                <option value="HT4">HT4 (4)</option>
-                <option value="LT4">LT4 (3)</option>
-                <option value="HT5">HT5 (2)</option>
-                <option value="LT5">LT5 (1)</option>
+                <option value="HT1">HT1 (60)</option><option value="LT1">LT1 (45)</option>
+                <option value="HT2">HT2 (30)</option><option value="LT2">LT2 (20)</option>
+                <option value="HT3">HT3 (10)</option><option value="LT3">LT3 (6)</option>
+                <option value="HT4">HT4 (4)</option><option value="LT4">LT4 (3)</option>
+                <option value="HT5">HT5 (2)</option><option value="LT5">LT5 (1)</option>
             </select>
         </div>
         <div id="pointsInputGroup" style="display:none;">
             <input id="manualPoints" type="number" placeholder="Add/Sub Points">
         </div>
         <button class="btn-save" onclick="updatePlayerData()">Save to Cloud</button>
-        <button class="btn-save" style="background:#666; margin-top:5px;" onclick="document.getElementById('adminPanel').style.display='none'">Close</button>
     </div>
 </div>
 
 <script>
-// YOUR CONFIG FROM SCREENSHOT
+// DATA FROM YOUR SCREENSHOTS
 const firebaseConfig = {
   apiKey: "AIzaSyDqCFNf8Y0373eYUr-Sexy4Qm91R_wv2lN",
   authDomain: "lpk-tiers.firebaseapp.com",
@@ -175,7 +81,6 @@ const firebaseConfig = {
   measurementId: "G-5YC586WNLJ"
 };
 
-// Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
@@ -223,48 +128,20 @@ function renderTabs() {
     `).join("");
 }
 
-function getPlayerTitle(rank) {
-    if (rank === 1) return "Combat Grandmaster";
-    if (rank === 2) return "Combat Master";
-    if (rank === 3) return "Combat Ace";
-    return "Combatant";
-}
-
 function renderPlayers() {
     const board = document.getElementById("leaderboard");
     board.innerHTML = "";
-
     const sorted = [...players].sort((a,b) => (b.scores[currentMode] || 0) - (a.scores[currentMode] || 0));
 
     sorted.forEach((p, i) => {
         const rank = i + 1;
-        let sideContent = "";
-
-        if (currentMode === "Overall") {
-            sideContent = `<div class="tier-icons-row">` + 
-                Object.entries(modesConfig).filter(([m]) => m !== "Overall").map(([m, img]) => `
-                    <div class="icon-unit">
-                        <img src="${img}">
-                        <span style="color:${p.tiers[m] && p.tiers[m] !== 'Unranked' ? '#f5b942' : '#555'}">${p.tiers[m] ? p.tiers[m].replace('Unranked','UR') : 'UR'}</span>
-                    </div>
-                `).join("") + `</div>`;
-        } else {
-            sideContent = `<b style="color:var(--gold); font-size: 1.2em;">${p.tiers[currentMode] || 'Unranked'}</b>`;
-        }
+        let sideContent = (currentMode === "Overall") ? 
+            `<div class="tier-icons-row">` + Object.entries(modesConfig).filter(([m]) => m !== "Overall").map(([m, img]) => `<div class="icon-unit"><img src="${img}"><span style="color:${p.tiers[m] && p.tiers[m] !== 'Unranked' ? '#f5b942' : '#555'}">${p.tiers[m] ? p.tiers[m].replace('Unranked','UR') : 'UR'}</span></div>`).join("") + `</div>` :
+            `<b style="color:var(--gold);">${p.tiers[currentMode] || 'Unranked'}</b>`;
 
         const div = document.createElement("div");
         div.className = "player";
-        div.innerHTML = `
-            <div class="rank-box">${rank}</div>
-            <div class="content-area">
-                <img class="skin" src="https://mc-heads.net/avatar/${p.name}">
-                <div class="info-text">
-                    <div class="name-line">${p.name}</div>
-                    <div class="title-line">${getPlayerTitle(rank)} (${p.scores[currentMode] || 0} pts)</div>
-                </div>
-                ${sideContent}
-                ${isAdmin ? `<button class="btn-remove" onclick="removePlayer('${p.name}')">×</button>` : ''}
-            </div>`;
+        div.innerHTML = `<div class="rank-box">${rank}</div><div class="content-area"><img class="skin" src="https://mc-heads.net/avatar/${p.name}"><div class="info-text"><div class="name-line">${p.name}</div><div class="title-line">${p.scores[currentMode] || 0} pts</div></div>${sideContent}${isAdmin ? `<button onclick="removePlayer('${p.name}')" style="background:red; color:white; border:none; padding:5px; margin-left:10px;">×</button>` : ''}</div>`;
         board.appendChild(div);
     });
 }
@@ -274,4 +151,31 @@ function login() {
         isAdmin = true;
         document.getElementById("loginArea").style.display = "none";
         document.getElementById("adminControls").style.display = "block";
-        renderPlayers
+        renderPlayers();
+    } else { alert("Wrong Password"); }
+}
+
+function updatePlayerData() {
+    const name = document.getElementById("targetName").value.trim();
+    if(!name) return;
+    let p = players.find(x => x.name.toLowerCase() === name.toLowerCase());
+    if(!p) {
+        p = { name: name, tiers: {}, scores: {}, bonus: 0 };
+        Object.keys(modesConfig).forEach(m => { p.tiers[m] = "Unranked"; p.scores[m] = 0; });
+    }
+    if (currentMode === "Overall") p.bonus = (p.bonus || 0) + (parseInt(document.getElementById("manualPoints").value) || 0);
+    else { const t = document.getElementById("tierSelector").value; p.tiers[currentMode] = t; p.scores[currentMode] = tierValues[t] || 0; }
+    let total = p.bonus || 0;
+    Object.keys(modesConfig).forEach(m => { if(m !== "Overall") total += (tierValues[p.tiers[m]] || 0); });
+    p.scores["Overall"] = total;
+    db.ref("players/" + name.replace(/\./g, '_')).set(p);
+    document.getElementById("targetName").value = "";
+    document.getElementById("manualPoints").value = "";
+}
+
+function removePlayer(name) { if(confirm("Delete " + name + "?")) db.ref("players/" + name.replace(/\./g, '_')).remove(); }
+document.getElementById("adminBtn").onclick = () => { const p = document.getElementById("adminPanel"); p.style.display = (p.style.display === "block") ? "none" : "block"; };
+window.onload = () => { renderTabs(); };
+</script>
+</body>
+</html>
