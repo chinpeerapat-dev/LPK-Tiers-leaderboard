@@ -125,11 +125,11 @@ function renderPlayers() {
         const rank = i + 1;
         const div = document.createElement("div");
         div.className = "player";
+        // FIXED THE QUOTES IN THE LINE BELOW
         div.innerHTML = `<div class="rank-box">${rank}</div><div class="content-area"><img class="skin" src="https://mc-heads.net/avatar/${p.name}"><div class="info-text"><div class="name-line">${p.name}</div><div class="title-line">${p.scores[currentMode] || 0} pts</div></div>${isAdmin ? `<button onclick="removePlayer('${p.name}')" style="background:red; color:white; border:none; padding:5px;">×</button>` : ''}</div>`;
         board.appendChild(div);
     });
 }
-
 function login() {
     if(document.getElementById("adminPassword").value === "DeepWoken#") {
         isAdmin = true;
@@ -167,3 +167,4 @@ window.onload = () => { renderTabs(); };
 </script>
 </body>
 </html>
+
