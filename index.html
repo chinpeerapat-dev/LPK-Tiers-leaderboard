@@ -123,10 +123,33 @@ function renderPlayers() {
 
     sorted.forEach((p, i) => {
         const rank = i + 1;
+        
+        // This section creates the icons with the tier names under them (like your screenshot)
+        let sideContent = (currentMode === "Overall") ? 
+            `<div class="tier-icons-row">` + Object.entries(modesConfig).filter(([m]) => m !== "Overall").map(([m, img]) => {
+                const tier = p.tiers[m] || 'Unranked';
+                const shortTier = tier.replace('Unranked', 'UR');
+                const tierColor = (tier !== 'Unranked') ? '#f5b942' : '#555';
+                return `<div class="icon-unit">
+                            <img src="${img}">
+                            <span style="color:${tierColor}">${shortTier}</span>
+                        </div>`;
+            }).join("") + `</div>` :
+            `<b style="color:var(--gold); font-size: 20px;">${p.tiers[currentMode] || 'Unranked'}</b>`;
+
         const div = document.createElement("div");
         div.className = "player";
-        // FIXED THE QUOTES IN THE LINE BELOW
-        div.innerHTML = `<div class="rank-box">${rank}</div><div class="content-area"><img class="skin" src="https://mc-heads.net/avatar/${p.name}"><div class="info-text"><div class="name-line">${p.name}</div><div class="title-line">${p.scores[currentMode] || 0} pts</div></div>${isAdmin ? `<button onclick="removePlayer('${p.name}')" style="background:red; color:white; border:none; padding:5px;">×</button>` : ''}</div>`;
+        div.innerHTML = `
+            <div class="rank-box">${rank}</div>
+            <div class="content-area">
+                <img class="skin" src="https://mc-heads.net/avatar/${p.name}">
+                <div class="info-text">
+                    <div class="name-line">${p.name}</div>
+                    <div class="title-line" style="color:var(--gold);">${p.scores[currentMode] || 0} pts</div>
+                </div>
+                ${sideContent}
+                ${isAdmin ? `<button onclick="removePlayer('${p.name}')" style="background:#ef4444; color:white; border:none; border-radius:4px; padding:4px 8px; margin-left:10px; cursor:pointer;">×</button>` : ''}
+            </div>`;
         board.appendChild(div);
     });
 }
@@ -166,4 +189,5 @@ document.getElementById("adminBtn").onclick = () => { const p = document.getElem
 window.onload = () => { renderTabs(); };
 </script>
 </body>
+
 </html>
